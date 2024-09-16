@@ -4,3 +4,7 @@ dags/__*
 dags/functions/__*
 functions/__*
 streamlit/__*
+data.csv
+test.*
+*.json
+.DS_Store

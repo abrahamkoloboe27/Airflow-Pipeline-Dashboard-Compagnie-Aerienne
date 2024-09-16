@@ -87,6 +87,6 @@ with DAG (
             compute_aggs_tasks.append(compute_task)
     
     end_task = EmptyOperator(task_id = 'end_task')
-    start_task >> fetch_postgres_data >> [compute_kpis_group, compute_aggs_group] >> end_task
+    start_task >> fetch_postgres_data  >> [compute_kpis_group,compute_aggs_group]  >> end_task
 
 

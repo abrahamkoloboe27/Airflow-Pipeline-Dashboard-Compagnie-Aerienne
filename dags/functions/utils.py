@@ -7,56 +7,49 @@ from datetime import datetime, date, timedelta
 from decimal import Decimal
 
 queries = {
-    "total_flights_per_week" :f"""
+    "total_flights_per_week": """
     SELECT 
-        DATE_TRUNC("day", actual_departure) + (7 - EXTRACT(DOW FROM actual_departure)::INTEGER ) * INTERVAL '1 day')) AS week_end,
+        DATE_TRUNC('day', actual_departure) + ((7 - EXTRACT(DOW FROM actual_departure)::INTEGER) * INTERVAL '1 day') AS week_end,
         COUNT(flight_id) AS total_flights
     FROM flights
     WHERE actual_departure IS NOT NULL
-    GROUP BY week_end
+    GROUP BY DATE_TRUNC('day', actual_departure) + ((7 - EXTRACT(DOW FROM actual_departure)::INTEGER) * INTERVAL '1 day')
     ORDER BY week_end DESC
-    LIMIT 2 ;
+    LIMIT 2;
     """, 
     
-    "delayed_flights_per_week" : f"""
+    "delayed_flights_per_week": """
     SELECT
-        DATE_TRUNC("day", actual_departure) + (7 - EXTRACT(DOW FROM actual_departure)::INTEGER ) * INTERVAL '1 day')) AS week_end,
+        DATE_TRUNC('day', actual_departure) + ((7 - EXTRACT(DOW FROM actual_departure)::INTEGER) * INTERVAL '1 day') AS week_end,
         COUNT(flight_id) AS delayed_flights
     FROM flights
     WHERE actual_departure IS NOT NULL
     AND scheduled_departure < actual_departure
-    GROUP BY week_end
+    GROUP BY DATE_TRUNC('day', actual_departure) + ((7 - EXTRACT(DOW FROM actual_departure)::INTEGER) * INTERVAL '1 day')
     ORDER BY week_end DESC
-    LIMIT 2 ;
+    LIMIT 2;
     """,
     
-    "flights_over_time" : f"""
+    "flights_over_time": """
     SELECT 
-        DATE_TRUNC("day", actual_departure) AS day,
+        DATE_TRUNC('day', actual_departure) AS day,
         COUNT(flight_id) AS num_flights
     FROM flights
     WHERE actual_departure IS NOT NULL
-    GROUP BY day
-    ORDER BY day ;
+    GROUP BY DATE_TRUNC('day', actual_departure)
+    ORDER BY day;
     """,
     
-    "average_delay_time_per_week" : f"""
-    WITH late_times AS (
-        SELECT 
-            flight_id,
-            EXTRACT(MINUTE FROM (actual_departure - scheduled_departure)) AS diff_minutes
-        FROM flights
-        WHERE actual_departure > scheduled_departure
-    )
+    "average_delay_time_per_week": """
     SELECT 
-        DATE_TRUNC("day", actual_departure) + (7 - EXTRACT(DOW FROM actual_departure)::INTEGER ) * INTERVAL '1 day')) AS week_end,
-        AVG(diff_minutes) AS avg_delay_minutes
-    FROM late_times, flights f
+        DATE_TRUNC('day', actual_departure) + ((7 - EXTRACT(DOW FROM actual_departure)::INTEGER) * INTERVAL '1 day') AS week_end,
+        AVG(EXTRACT(EPOCH FROM (actual_departure - scheduled_departure)) / 60) AS average_delay_minutes
+    FROM flights
     WHERE actual_departure IS NOT NULL
-    AND late_times.flight_id = f.flight_id
-    GROUP BY week_end
+    AND scheduled_departure IS NOT NULL
+    GROUP BY DATE_TRUNC('day', actual_departure) + ((7 - EXTRACT(DOW FROM actual_departure)::INTEGER) * INTERVAL '1 day')
     ORDER BY week_end DESC
-    LIMIT 2 ;
+    LIMIT 2;
     """ ,
     
     "top_airports_by_departures" : f"""
@@ -71,33 +64,33 @@ queries = {
     LIMIT 10 ;
     """,
     
-    "average_passengers_per_flight_per_week" : f"""
-        WITH nb_pss AS (
-            SELECT
-                f.flight_id,
-                COUNT(b.*) AS nb_pass
-            FROM flights f
-            JOIN boarding_passes b ON f.flight_id = b.flight_id
-            GROUP BY f.flight_id
-        )
-        SELECT 
-            DATE_TRUNC("day", actual_departure) + (7 - EXTRACT(DOW FROM actual_departure)::INTEGER ) * INTERVAL '1 day')) AS week_end,
-            AVG(nb_pss.nb_pass) AS average_passengers
+    "average_passengers_per_flight_per_week": """
+    WITH nb_pss AS (
+        SELECT
+            f.flight_id,
+            COUNT(b.*) AS nb_pass
         FROM flights f
-        JOIN nb_pss ON f.flight_id = nb_pss.flight_id
-        WHERE actual_departure IS NOT NULL
-        GROUP BY week_end
-        ORDER BY week_end DESC
-        LIMIT 2 ;
+        JOIN boarding_passes b ON f.flight_id = b.flight_id
+        GROUP BY f.flight_id
+    )
+    SELECT 
+        DATE_TRUNC('day', actual_departure) + ((7 - EXTRACT(DOW FROM actual_departure)::INTEGER) * INTERVAL '1 day') AS week_end,
+        AVG(nb_pss.nb_pass) AS average_passengers
+    FROM flights f
+    JOIN nb_pss ON f.flight_id = nb_pss.flight_id
+    WHERE actual_departure IS NOT NULL
+    GROUP BY DATE_TRUNC('day', actual_departure) + ((7 - EXTRACT(DOW FROM actual_departure)::INTEGER) * INTERVAL '1 day')
+    ORDER BY week_end DESC
+    LIMIT 2;
     """,
-    "last_weeks_revenue" : f"""
-        SELECT 
-            DATE_TRUNC("day", actual_departure) + (7 - EXTRACT(DOW FROM actual_departure)::INTEGER ) * INTERVAL '1 day')) AS week_end,
-            SUM(total_amount) AS total_revenue
-        FROM bookings
-        GROUP BY week_end
-        ORDER BY week_end DESC
-        LIMIT 2 ;
+    "last_weeks_revenue": """
+    SELECT 
+        DATE_TRUNC('day', book_date) + ((7 - EXTRACT(DOW FROM book_date)::INTEGER) * INTERVAL '1 day') AS week_end,
+        SUM(total_amount) AS total_revenue
+    FROM bookings
+    GROUP BY DATE_TRUNC('day', book_date) + ((7 - EXTRACT(DOW FROM book_date)::INTEGER) * INTERVAL '1 day')
+    ORDER BY week_end DESC
+    LIMIT 2;
     """,
     "flights_lines" : f"""
         WITH lines AS (
@@ -105,24 +98,18 @@ queries = {
                 d.city AS departure_city,
                 d.coordinates AS departure_coords,
                 a.city AS arrival_city,
-                a.coordinates AS arrival_coords
-                DATE_TRUNC('day', (DATE_TRUNC('day', actual_departure) + (7 - EXTRACT(DOW FROM actual_departure)::INTEGER ) * INTERVAL '1 day'))) AS week_end
+                a.coordinates AS arrival_coords,
+                DATE_TRUNC('day', (DATE_TRUNC('day', actual_departure) + ((7 - EXTRACT(DOW FROM actual_departure)::INTEGER ) * INTERVAL '1 day'))) AS week_end
             FROM flights f, airports_data d, airports_data a
             WHERE f.departure_airport = d.airport_code
             AND f.arrival_airport = a.airport_code
-        ),
-        weeks AS (
-            SELECT 
-                DATE_TRUNC('day', actual_departure) + (7 - EXTRACT(DOW FROM actual_departure)::INTEGER ) * INTERVAL '1 day') AS week_end
-            FROM flights
         )
         SELECT 
             departure_city,
-            departure_coordinates,
+            departure_coords AS departure_coordinates,
             arrival_city,
-            arrival_coordinates,
-        FROM lines, weeks
-        WHERE lines.week_end = weeks.week_end;
+            arrival_coords AS arrival_coordinates
+        FROM lines;
             
     """
     
@@ -149,9 +136,9 @@ def fetch_table_from_postresql(table_name, conn_id='postgres_default'):
     if table_name == "flights":
         query = f"SELECT * FROM {table_name} WHERE scheduled_arrival <= '2017-05-15' "
     elif table_name == "bookings" :
-        query = f"SELECT * FROM {table_name} WHERE book_date <= '2017-05-15' LIMIT 1000 "
+        query = f"SELECT * FROM {table_name} WHERE book_date <= '2017-05-15' LIMIT 100000 "
     else : 
-        query = f"SELECT * FROM {table_name} LIMIT 1000"  
+        query = f"SELECT * FROM {table_name} LIMIT 100000"  
      
     df = pd.read_sql(query, conn)
     conn.close()
