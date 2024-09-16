@@ -1,8 +1,8 @@
 x-airflow-common: 
   &airflow-common
-  build : .
+  build : ./
   image: ${AIRFLOW_IMAGE_NAME:-extend_airflow:latest}
-  environment :
+  environment : &airflow-common-env
     AIRFLOW__CORE__EXECUTOR : LocalExecutor
     AIRFLOW__CORE__SQL_ALCHEMY_CONN : postgresql+psycopg2://airflow:airflow@postgres/airflow
     AIRFLOW__CELERY__RESULT_BACKEND : db+postgresql://airflow:airflow@postgres/airflow
@@ -20,6 +20,7 @@ x-airflow-common:
       condition : service_healthy
 
 services:
+
   postgres : 
     image : postgres:13
     environment :
@@ -36,7 +37,10 @@ services:
     ports:
       - "5432:5432"
 
-  postgres_etl : 
+
+
+
+  postgres-etl : 
     image : postgres:13
     environment :
       POSTGRES_USER : etl
@@ -51,6 +55,10 @@ services:
       - postgres-etl-db-volume:/var/lib/postgresql/data
     ports:
       - "5433:5432"
+
+
+
+
   pgadmin : 
     image : dpage/pgadmin4
     environment :
@@ -59,14 +67,20 @@ services:
     ports :
       - "8081:80"
     
+
+
+
   streamlit : 
-    build : /streamlit
+    build : ./streamlit
     ports : 
       - "8501:8501"
     volumes :
       - ./streamlit:/streamlit
     command : ["streamlit", "run", "Dashboard.py"]
   
+
+
+
   airflow-webserver : 
     << : *airflow-common
     command : webserver
@@ -77,6 +91,9 @@ services:
       interval : 30s
       timeout : 30s
       retries : 3
+
+
+
   airflow-scheduler : 
     << : *airflow-common
     command : scheduler
@@ -85,6 +102,9 @@ services:
       interval : 30s
       timeout : 30s
       retries : 3
+
+
+
   airflow-init : 
     << : *airflow-common
     command : version
