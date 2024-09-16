@@ -1,2 +1,6 @@
 logs/*
 dump/*
+dags/__*
+dags/functions/__*
+functions/__*
+streamlit/__*

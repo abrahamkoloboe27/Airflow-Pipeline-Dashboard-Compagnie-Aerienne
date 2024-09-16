@@ -1,5 +1,5 @@
 streamlit
-pandas
-plotly
-pymongo
-numpy
+#pandas
+#plotly
+#pymongo
+#numpy
