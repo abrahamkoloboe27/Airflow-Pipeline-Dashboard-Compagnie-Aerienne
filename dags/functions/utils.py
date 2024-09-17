@@ -1,5 +1,6 @@
 import pandas as pd
 from airflow.providers.postgres.hooks.postgres import PostgresHook
+from airflow.providers.mongo.hooks.mongo import MongoHook
 import os 
 import json
 import duckdb as db
@@ -136,9 +137,9 @@ def fetch_table_from_postresql(table_name, conn_id='postgres_default'):
     if table_name == "flights":
         query = f"SELECT * FROM {table_name} WHERE scheduled_arrival <= '2017-05-15' "
     elif table_name == "bookings" :
-        query = f"SELECT * FROM {table_name} WHERE book_date <= '2017-05-15' LIMIT 1000000 "
+        query = f"SELECT * FROM {table_name} WHERE book_date <= '2017-05-15' LIMIT 100000"
     else : 
-        query = f"SELECT * FROM {table_name} LIMIT 1000000"  
+        query = f"SELECT * FROM {table_name} LIMIT 100000"  
      
     df = pd.read_sql(query, conn)
     conn.close()
@@ -173,3 +174,21 @@ def serialize(obj):
     if isinstance(obj, (datetime, date)):
         return obj.isoformat()
     raise TypeError(f"Object of type {type(obj)} is not serializable")
+
+def load_to_mongo(stat, file_path):
+    with open(file_path, 'r') as f:
+        data = json.load(f)
+    mongo_hook = MongoHook(conn_id="mongo_flights")
+    client = mongo_hook.get_conn()
+    db = client["kpi_graph"]
+    collection = db[stat]
+    collection.delete_many({})
+    if data:
+        collection.insert_many(data)
+    client.close()
+    
+def clean_up_files():
+    for file in os.listdir("dump"):
+        file_path = os.path.join("dump", file)
+        if os.path.isfile(file_path):
+            os.remove(file_path)

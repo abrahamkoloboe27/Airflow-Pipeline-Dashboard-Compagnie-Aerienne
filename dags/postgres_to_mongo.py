@@ -85,8 +85,37 @@ with DAG (
                 }
             )
             compute_aggs_tasks.append(compute_task)
-    
+    with TaskGroup("load_kpis") as load_kpis_group:
+        load_kpis_tasks = []
+        for kpi in kpis:
+            load_task = PythonOperator(
+                task_id = f"load_{kpi}_to_mongo",
+                python_callable = load_to_mongo,
+                op_kwargs = {
+                    'stat': kpi,
+                    'file_path': f"dump/{kpi}.json"
+                }
+            )
+            load_kpis_tasks.append(load_task)
+    with TaskGroup("load_aggs") as load_aggs_group:
+        load_aggs_tasks = []
+        for agg in aggs:
+            load_task = PythonOperator(
+                task_id = f"load_{agg}_to_mongo",
+                python_callable = load_to_mongo,
+                op_kwargs = {
+                    'stat': agg,
+                    'file_path': f"dump/{agg}.json"
+                }
+            )
+            load_aggs_tasks.append(load_task)
+    cleanup_task = PythonOperator(
+        task_id = 'cleanup_files',
+        python_callable = clean_up_files
+    )
     end_task = EmptyOperator(task_id = 'end_task')
-    start_task >> fetch_postgres_data  >> [compute_kpis_group,compute_aggs_group]  >> end_task
+    start_task >> fetch_postgres_data  >> [compute_kpis_group,compute_aggs_group]  
+    compute_kpis_group >> load_kpis_group >> cleanup_task >> end_task
+    compute_aggs_group >> load_aggs_group >> cleanup_task >> end_task
 
 
