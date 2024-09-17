@@ -85,7 +85,7 @@ with col_3:
     avg_delay_time_last_week = round(float(average_delay_time_df.iloc[0]["average_delay_minutes"]), 2)
     avg_delay_time_last_2week = round(float(average_delay_time_df.iloc[1]["average_delay_minutes"]), 2)
     delta = round(avg_delay_time_last_week - avg_delay_time_last_2week, 2)
-    st.metric("Average Delay Time", value=avg_delay_time_last_week, delta=delta)
+    st.metric("Average Delay Time", value=avg_delay_time_last_week, delta=delta, delta_color="inverse")
 with col_4:
     avarage_delay_time_last_week = round(float(average_passengers_per_flight_per_week_df.iloc[0]["average_passengers"]), 2)
     avarage_delay_time_last_2week = round(float(average_passengers_per_flight_per_week_df.iloc[1]["average_passengers"]), 2)
