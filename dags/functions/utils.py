@@ -136,9 +136,9 @@ def fetch_table_from_postresql(table_name, conn_id='postgres_default'):
     if table_name == "flights":
         query = f"SELECT * FROM {table_name} WHERE scheduled_arrival <= '2017-05-15' "
     elif table_name == "bookings" :
-        query = f"SELECT * FROM {table_name} WHERE book_date <= '2017-05-15' LIMIT 100000 "
+        query = f"SELECT * FROM {table_name} WHERE book_date <= '2017-05-15' LIMIT 1000000 "
     else : 
-        query = f"SELECT * FROM {table_name} LIMIT 100000"  
+        query = f"SELECT * FROM {table_name} LIMIT 1000000"  
      
     df = pd.read_sql(query, conn)
     conn.close()

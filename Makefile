@@ -2,7 +2,6 @@ up :
 	docker compose up -d
 build : 
 	docker compose build
-up-build : 
-	docker compose up --build -d
+up-build : build up 
 down :
 	docker compose down
