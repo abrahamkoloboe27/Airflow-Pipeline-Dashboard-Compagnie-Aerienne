@@ -114,3 +114,82 @@ daily_flights_fig.update_layout(
     
 )
 st.plotly_chart(daily_flights_fig, use_container_width=True)
+
+# Top aéroports par nombre de départs et relation entre distance et nombre de vols
+col1, col2 = st.columns(2)
+
+with col1:
+    data = top_airports_by_departures_df.sort_values(by="num_departures", ascending=True)
+    data["airport_name"] = data["airport_name"].apply(eval)
+    #st.dataframe(data)
+    data["name"] = data["airport_name"].apply(lambda x: x["en"])
+    bar_chart = px.bar(data,
+                       x="num_departures", y="name", 
+                       orientation="h", title="Top Airports by Departures", 
+                       labels={"num_departures": "Number of Departures", "name": "Airport Name"})
+    st.plotly_chart(bar_chart, use_container_width=True)
+    
+with col2:
+    # Convertir les données de la collection MongoDB en DataFrame pandas
+    flight_list = list(flights_lines_col.find())
+    flight_df = pd.DataFrame(flight_list)
+
+    # Afficher le DataFrame avec Streamlit
+    #st.write(flight_df)
+    lines = []
+    markers = []
+
+    for flight in flight_list:
+        # Extraire les données
+        departure_coords = tuple(map(float, flight["departure_coordinates"][1:-1].split(",")))
+        arrival_coords = tuple(map(float, flight["arrival_coordinates"][1:-1].split(",")))
+        departure_city = eval(flight["departure_city"])["en"]
+        arrival_city = eval(flight["arrival_city"])["en"]
+        # Ajouter les lignes
+        lines.append(
+            go.Scattergeo(
+                lon = [departure_coords[0], arrival_coords[0]],
+                lat = [departure_coords[1], arrival_coords[1]],
+                mode = "lines",
+                line = dict(width = 1, color = "red"),
+                opacity = 0.5
+            )
+        )
+        # Ajouter les marqueurs pour les aéroports de départ et d'arrivée
+        # Départ en bleu
+        markers.append(
+            go.Scattergeo(
+                lon = [departure_coords[0]],
+                lat = [departure_coords[1]],
+                mode = "markers",
+                marker = dict(size = 10, color = "blue"),
+                text = departure_city,
+            )
+        )
+        # Arrivée en rouge
+        markers.append(
+            go.Scattergeo(
+                lon = [arrival_coords[0]],
+                lat = [arrival_coords[1]],
+                mode = "markers",
+                marker = dict(size = 10, color = "red"),
+                text = arrival_city,
+            )
+        )
+
+    # Afficher les lignes et les marqueurs sur une carte
+    fig = go.Figure(data=lines + markers)
+    fig.update_layout(
+        title="Flight Paths",
+        showlegend=False,
+        geo=dict(
+            projection_type="equirectangular",
+            showland=True,
+            landcolor="rgb(243, 243, 243)",
+            subunitwidth=1,
+            countrywidth=1,
+            subunitcolor="rgb(217, 217, 217)",
+            countrycolor="rgb(217, 217, 217)"
+        ),
+    )
+    st.plotly_chart(fig, use_container_width=True)
