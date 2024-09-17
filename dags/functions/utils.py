@@ -134,12 +134,12 @@ aggs = [v for v in stats if "week" not in v ]
 def fetch_table_from_postresql(table_name, conn_id='postgres_default'):
     pg_hook = PostgresHook(postgres_conn_id=conn_id)
     conn = pg_hook.get_conn()
-    if table_name == "flights":
-        query = f"SELECT * FROM {table_name} WHERE scheduled_arrival <= '2017-05-15' "
-    elif table_name == "bookings" :
-        query = f"SELECT * FROM {table_name} WHERE book_date <= '2017-05-15' LIMIT 100000"
-    else : 
-        query = f"SELECT * FROM {table_name} LIMIT 100000"  
+    # if table_name == "flights":
+    #     query = f"SELECT * FROM {table_name} WHERE scheduled_arrival <= '2017-05-15' "
+    # elif table_name == "bookings" :
+    #     query = f"SELECT * FROM {table_name} WHERE book_date <= '2017-05-15' LIMIT 100000"
+    # else : 
+    query = f"SELECT * FROM {table_name} LIMIT 100000"  
      
     df = pd.read_sql(query, conn)
     conn.close()
