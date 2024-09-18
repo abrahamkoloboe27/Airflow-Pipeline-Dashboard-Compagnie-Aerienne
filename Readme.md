@@ -1,78 +1,115 @@
-# Dashboard Compagnie aérienne # Dashboard pour Compagnie Aérienne
-Ce projet est un tableau de bord pour une compagnie aérienne. Les données sont obtenues à partir de [ce lien](https://edu.postgrespro.com/demo-big-en.zip).
 
-## Description du Projet
 
-Le projet se compose de deux parties principales :
+# Airline Company Dashboard
 
-1. **Pipeline de Données** : Créé avec Airflow et DuckDB, ce pipeline extrait les données d'une base PostgreSQL et les charge dans une base MongoDB sur Atlas.
-2. **Application Streamlit** : Cette application récupère les données de la base MongoDB, les traite et les affiche sous forme de tableau de bord interactif.
+This project is an interactive dashboard for an airline company, integrating a data pipeline orchestrated with Airflow to handle data ingestion, transformation, and visualization.
 
-## Structure du Projet
+The data used in this project is available through this [link](https://edu.postgrespro.com/demo-big-en.zip).
 
-- **Airflow** : Utilisé pour orchestrer le pipeline de données.
-- **DuckDB** : Utilisé pour le traitement intermédiaire des données.
-- **PostgreSQL** : Source des données initiales.
-- **MongoDB Atlas** : Base de données cible pour le stockage des données traitées.
-- **Streamlit** : Utilisé pour créer le tableau de bord interactif.
+## Table of Contents
 
-## Prérequis
+1. [Project Overview](#1-project-overview)
+2. [Data Source](#2-data-source)
+3. [Pipeline Architecture](#3-pipeline-architecture)
+4. [Technologies Used](#4-technologies-used)
+5. [How to Run the Project](#5-how-to-run-the-project)
+6. [Makefile Commands](#6-makefile-commands)
 
-- Docker
-- Docker Compose
-- Make
+---
 
-## Installation
+## 1. Project Overview
 
-Clonez le dépôt et naviguez dans le répertoire du projet :
+The project consists of two main components:
 
-```bash
-git clone https://github.com/abrahamkoloboe27/Airflow-Pipeline-Dashboard-Compagnie-Aerienne
-cd AIRFLOW
-```
+1. **Data Pipeline**: Managed by Airflow, this pipeline extracts data from a PostgreSQL database, transforms it using DuckDB, and loads it into MongoDB Atlas for efficient storage.
+2. **Streamlit Dashboard**: This application retrieves the data stored in MongoDB Atlas, processes it, and displays it in an interactive dashboard for real-time visualization.
 
-## Lancer le Projet
+## 2. Data Source
 
-Pour lancer le projet, utilisez les commandes suivantes :
+The data used for this project is sourced from a PostgreSQL database and can be downloaded from the following [link](https://edu.postgrespro.com/demo-big-en.zip). The data includes information about flights, passengers, and various operational aspects of the airline.
 
-### Initialisation
+## 3. Pipeline Architecture
 
-```bash
-make build
-```
+The data pipeline follows these steps:
 
-Cette commande construit les images Docker nécessaires.
+1. **Data Extraction (PostgreSQL)**: Airflow orchestrates the extraction of data from the PostgreSQL database.
+2. **Transformation (DuckDB)**: DuckDB is used to perform fast and efficient data transformations.
+3. **Loading (MongoDB Atlas)**: The transformed data is loaded into MongoDB Atlas, ready for visualization.
+4. **Visualization (Streamlit)**: The Streamlit app connects to MongoDB, retrieves the data, processes it, and displays it in an interactive dashboard.
 
-### Démarrage des Services
+## 4. Technologies Used
 
-```bash
-make up
-```
+The following technologies are utilized in this project:
 
-Cette commande démarre tous les services nécessaires, y compris Airflow et MongoDB.
+- **Airflow**: A workflow orchestrator used to automate the ETL pipeline.
+- **DuckDB**: An OLAP engine used for efficient data processing.
+- **PostgreSQL**: A relational database, the source of the data.
+- **MongoDB Atlas**: A NoSQL database for storing the processed data.
+- **Streamlit**: A web interface to display the data in an interactive dashboard.
+- **Docker & Docker Compose**: Used to containerize the services and manage orchestration.
 
-### Démarrage et Construction des Services
+## 5. How to Run the Project
 
-```bash
-make up-build
-```
+### Prerequisites
 
-Cette commande construit et démarre tous les services nécessaires.
+Make sure you have the following tools installed on your machine:
 
-### Arrêt des Services
+- **Docker**
+- **Docker Compose**
+- **Make**
 
-```bash
-make down
-```
+### Installation Steps
 
-Cette commande arrête tous les services en cours d'exécution.
+1. Clone the GitHub repository:
+   ```bash
+   git clone https://github.com/abrahamkoloboe27/Airflow-Pipeline-Dashboard-Compagnie-Aerienne
+   cd Airflow-Pipeline-Dashboard-Compagnie-Aerienne
+   ```
 
-## Utilisation
+2. Configure Airflow connections:
+   - After starting the services, navigate to the Airflow web interface.
+   - Go to **Admin > Connections** in Airflow.
+   - Add connections for PostgreSQL and MongoDB Atlas with the correct URI, login, and password.
 
-1. **Pipeline de Données** : Le pipeline Airflow extrait les données de PostgreSQL, les traite avec DuckDB et les charge dans MongoDB Atlas.
-2. **Tableau de Bord** : L'application Streamlit récupère les données de MongoDB, les traite et les affiche.
+### Launching the Services
+
+- **Build Docker Images**:
+   ```bash
+   make build
+   ```
+   This command builds the necessary Docker images for the services.
+
+- **Start the Services**:
+   ```bash
+   make up
+   ```
+   This command starts Airflow, PostgreSQL, MongoDB Atlas, and the Streamlit app.
+
+- **Build and Start Services Simultaneously**:
+   ```bash
+   make up-build
+   ```
+   This command rebuilds the services if necessary and then starts them.
+
+- **Stop the Services**:
+   ```bash
+   make down
+   ```
+   This command stops all running services.
+
+## 6. Makefile Commands
+
+The Makefile included in the project allows you to execute the following commands:
+
+- **`make build`**: Builds the Docker images required for the project.
+- **`make up`**: Starts the containerized services (Airflow, PostgreSQL, MongoDB, Streamlit).
+- **`make up-build`**: Rebuilds the Docker images and starts the services.
+- **`make down`**: Stops all the running services.
+
+---
 
 ## Conclusion
 
-Ce projet fournit une solution complète pour la gestion et la visualisation des données d'une compagnie aérienne. Il utilise des technologies modernes pour assurer une orchestration efficace et une visualisation interactive des données.
+This project provides a comprehensive solution for data management and visualization for an airline company. It integrates a complete data pipeline that automates extraction, transformation, and loading (ETL) of data, while Streamlit provides an interactive environment for exploring and analyzing the data in real time.
 
+---
