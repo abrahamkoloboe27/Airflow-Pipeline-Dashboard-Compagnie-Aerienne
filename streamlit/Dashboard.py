@@ -21,7 +21,9 @@ st.set_page_config(
 
 @st.fragment
 def connect_to_mongo():
-    client = MongoClient("mongodb+srv://reporting:ChNNKat9xpZpPOYg@cluster0.z4sob.mongodb.net/")
+    with open("mongo_srv.txt", "r") as file:
+        mongo_srv = file.readline().strip()
+    client = MongoClient(mongo_srv)
     db = client.kpi_graph
     return db
 db = connect_to_mongo()
@@ -80,7 +82,7 @@ with col_2:
     num_delayed_flights_last_week = int(delayed_flights_per_week_df.iloc[0]["delayed_flights"])
     num_delayed_flights_last_2week = int(delayed_flights_per_week_df.iloc[1]["delayed_flights"])
     delta = num_delayed_flights_last_week - num_delayed_flights_last_2week
-    st.metric("Delayed Flights", value=num_delayed_flights_last_week, delta=delta)
+    st.metric("Delayed Flights", value=num_delayed_flights_last_week, delta=delta, delta_color="inverse" )
 with col_3:
     avg_delay_time_last_week = round(float(average_delay_time_df.iloc[0]["average_delay_minutes"]), 2)
     avg_delay_time_last_2week = round(float(average_delay_time_df.iloc[1]["average_delay_minutes"]), 2)
@@ -90,12 +92,12 @@ with col_4:
     avarage_delay_time_last_week = round(float(average_passengers_per_flight_per_week_df.iloc[0]["average_passengers"]), 2)
     avarage_delay_time_last_2week = round(float(average_passengers_per_flight_per_week_df.iloc[1]["average_passengers"]), 2)
     delta = round(avarage_delay_time_last_week - avarage_delay_time_last_2week, 2)
-    st.metric("Average Passengers per Flight", value=avarage_delay_time_last_week, delta=delta)
+    st.metric("Average Passengers per Flight", value=avarage_delay_time_last_week, delta=delta, delta_color="inverse")
 with col_5:
-    last_week_revenue = round(float(last_weeks_revenue_df.iloc[0]["total_revenue"])/1000000, 2)
-    last_week_revenue_last_week_str = f"{round(float(last_weeks_revenue_df.iloc[0]['total_revenue']), 2)} $B"
+    last_week_revenue = round(float(last_weeks_revenue_df.iloc[0]["total_revenue"]/1000000000), 2)
+    last_week_revenue_last_week_str = f"{round(float(last_weeks_revenue_df.iloc[0]['total_revenue']/1000000000), 2)} $B"
     last_2week_revenue = round(float(last_weeks_revenue_df.iloc[1]["total_revenue"]), 2)
-    delta = round((last_week_revenue - last_2week_revenue)/1000000, 2)
+    delta = round(((last_week_revenue - last_2week_revenue)/1000000000), 2)
     st.metric("Last Week Revenue", value=last_week_revenue_last_week_str, delta=delta)
     
 # Ligne 2 :  Graphiques
@@ -131,8 +133,9 @@ with col1:
     
 with col2:
     # Convertir les données de la collection MongoDB en DataFrame pandas
-    flight_list = list(flights_lines_col.find())
+    flight_list = list(flights_lines_col.find().limit(50))
     flight_df = pd.DataFrame(flight_list)
+    # flight_df = flight_df.iloc[:50]
 
     # Afficher le DataFrame avec Streamlit
     #st.write(flight_df)
