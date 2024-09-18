@@ -38,7 +38,7 @@ defaul_args = {
     'owner': 'airflow', 
     'depends_on_past': False,
     'start_date': days_ago(1),   
-    'retries': 1,
+    'retries': 5,
     'retry_delay': timedelta(minutes=1),
 }
 
