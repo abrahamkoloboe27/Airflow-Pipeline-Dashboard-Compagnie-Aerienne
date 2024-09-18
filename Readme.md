@@ -30,6 +30,8 @@ The data used for this project is sourced from a PostgreSQL database and can be 
 
 ## 3. 🛠️ Pipeline Architecture
 
+![Pipeline Architecture](img/pipeline.png)
+
 The data pipeline follows these steps:
 
 1. **Data Extraction (PostgreSQL)**: Airflow orchestrates the extraction of data from the PostgreSQL database.
@@ -115,4 +117,4 @@ This project provides a comprehensive solution for data management and visualiza
 
 ---
 
-![Pipeline Architecture](img/pipeline.jpeg)
+
