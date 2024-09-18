@@ -37,6 +37,8 @@ The data pipeline follows these steps:
 3. **Loading (MongoDB Atlas)**: The transformed data is loaded into MongoDB Atlas, ready for visualization.
 4. **Visualization (Streamlit)**: The Streamlit app connects to MongoDB, retrieves the data, processes it, and displays it in an interactive dashboard.
 
+![Pipeline Architecture](img/pipeline.jpeg)
+
 ## 4. 💻 Technologies Used
 
 The following technologies are utilized in this project:
