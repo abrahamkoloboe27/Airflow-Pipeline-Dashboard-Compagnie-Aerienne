@@ -94,14 +94,17 @@ services:
       timeout : 30s
       retries : 3
 
-  airflow-worker : 
-    << : *airflow-common
-    command : worker
-    healthcheck :
-      test : ["CMD-SHELL", "[ -f /opt/airflow/airflow-worker.pid ]"]
-      interval : 30s
-      timeout : 30s
-      retries : 3
+  airflow-worker:
+    <<: *airflow-common
+    command: celery worker
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - 'celery --app airflow.providers.celery.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}" || celery --app airflow.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}"'
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
   airflow-scheduler : 
     << : *airflow-common
