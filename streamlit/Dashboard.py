@@ -134,7 +134,7 @@ with col1:
     
 with col2:
     # Convertir les données de la collection MongoDB en DataFrame pandas
-    flight_list = list(flights_lines_col.find())
+    flight_list = list(flights_lines_col.find().limit(150))
     flight_df = pd.DataFrame(flight_list)
     # flight_df = flight_df.iloc[:50]
 
