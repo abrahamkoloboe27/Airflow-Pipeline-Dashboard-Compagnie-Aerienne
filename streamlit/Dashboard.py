@@ -104,7 +104,8 @@ with col_5:
 col1 = st.columns(1)[0]
 #st.dataframe(flights_over_time_df)
 data = flights_over_time_df.sort_values(by="day", ascending=True)
-daily_flights_fig = px.line(data, x="day", y="num_flights", title="Daily Flights", labels={"num_flights": "Number of Flights", "day": "Day"})
+daily_flights_fig = px.line(data, x="day", y="num_flights", title="Daily Flights", 
+                            labels={"num_flights": "Number of Flights", "day": "Day"})
 daily_flights_fig.update_traces(line=dict(color="blue"))
 daily_flights_fig.update_layout(
     xaxis = dict(
