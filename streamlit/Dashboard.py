@@ -21,9 +21,9 @@ st.set_page_config(
 
 @st.fragment
 def connect_to_mongo():
-    with open("mongo_srv.txt", "r") as file:
-        mongo_srv = file.readline().strip()
-    client = MongoClient(mongo_srv)
+    # with open("mongo_srv.txt", "r") as file:
+    #     mongo_srv = file.readline().strip()
+    client = MongoClient("mongodb+srv://reporting:ChNNKat9xpZpPOYg@cluster0.z4sob.mongodb.net/")
     db = client.kpi_graph
     return db
 db = connect_to_mongo()
